@@ -1,18 +1,32 @@
 <script lang="ts">
 import storeitem from '@/components/storeitem.vue'
+import { db } from '@/main'
+import { collection, getDocs } from "firebase/firestore";
 
 export default {
+  data() {
+    return {
+      products: null,
+    }
+  },
   components: {
     storeitem
   },
+  created() {
+    const getProducts = async () => {
+      let query = await getDocs(collection(db, "products"));
+      this.products = query.docs.map(doc => doc.data());
+    }
+    getProducts();
+  }
 }
 </script>
 
 <template>
   <main>
-    <storeitem
-      img="https://s3.amazonaws.com/pocket-curatedcorpusapi-prod-images/b57c05ba-5668-468f-b4c3-727796f2c368.jpeg"
-      title="Test Item 1" description="This is a test item" price=999.99>
+    <storeitem v-for="product in products" :img="product.imageUrl" :title="product.displayName"
+      :description="product.descriptionShort" :price="product.price" :sale="product.sale"
+      :beforeprice="product.beforePrice">
     </storeitem>
   </main>
 </template>
